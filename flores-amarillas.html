@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Flores Amarillas 🌼</title>
+  <style>
+    :root{
+      --bg1: #fff9e6;
+      --bg2: #fff3b0;
+      --petal: #ffd54f;
+      --petal-dark: #ffb300;
+      --center: #8b5e00;
+      --stem: #2f7a3a;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg1),var(--bg2));overflow:hidden}
+    .title{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:60;text-align:center;color:#6b4b00;text-shadow:0 3px 10px rgba(0,0,0,.06)}
+    .title h1{margin:0;font-size:clamp(20px,3.5vw,36px)}
+    .garden{position:fixed;inset:0;overflow:hidden}
+    .flower{
+      position:absolute;
+      width:110px;height:140px;
+      transform-origin:center bottom;
+      pointer-events:none;
+      will-change:transform,opacity;
+    }
+    /* petal shape */
+    .petal{
+      position:absolute;
+      left:50%;top:38%;
+      width:46px;height:68px;
+      transform-origin:50% 85%;
+      border-radius:50% 50% 40% 40%/60% 60% 40% 40%;
+      background:var(--petal);
+      box-shadow:inset -6px -8px 12px rgba(0,0,0,0.06);
+    }
+    .petal.dark{background:var(--petal-dark);opacity:.95}
+    .center-dot{
+      position:absolute;left:50%;top:48%;
+      width:52px;height:52px;margin-left:-26px;margin-top:-26px;
+      background:radial-gradient(circle at 30% 30%, #a36b00, #5a3a00);
+      border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,.12);
+      display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;
+    }
+    .stem{
+      position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+      width:6px;height:60px;background:linear-gradient(180deg,var(--stem),#1e5b2a);
+      border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,.08);
+    }
+    /* small leaves */
+    .leaf{position:absolute;width:28px;height:16px;border-radius:14px;background:linear-gradient(180deg,#3aa14a,#2f7a3a);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+    /* gentle floating animation */
+    @keyframes bob { 0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)} }
+    .flower.float{animation:bob var(--dur,4000ms) ease-in-out infinite}
+    /* responsive */
+    @media (max-width:480px){.flower{width:76px;height:96px}.petal{width:34px;height:52px}.center-dot{width:40px;height:40px;margin-left:-20px;margin-top:-20px}}
+    /* hint */
+    .hint{position:fixed;left:12px;bottom:12px;color:#6b4b00;font-size:13px;opacity:.9;z-index:80}
+  </style>
+</head>
+<body>
+  <div class="title"><h1>Jardín de flores amarillas 🌼</h1></div>
+  <div class="garden" id="garden" aria-hidden="false"></div>
+  <div class="hint">Haz clic / toca para plantar más flores</div>
+
+  <script>
+    // Generador de flores amarillas
+    const garden = document.getElementById('garden');
+    const petalColors = ['#ffd54f','#ffdd57','#ffca28','#ffd149'];
+    function rand(min,max){return Math.random()*(max-min)+min}
+
+    function makeFlower(x, y, scale=1){
+      const f = document.createElement('div');
+      f.className = 'flower float';
+      const dur = Math.floor(rand(4000,8000));
+      f.style.setProperty('--dur', dur + 'ms');
+      const w = 110*scale, h = 140*scale;
+      f.style.width = w+'px'; f.style.height = h+'px';
+      f.style.left = (x - w/2) + 'px'; f.style.top = (y - h/2) + 'px';
+      f.style.zIndex = Math.floor(rand(10,50));
+
+      // create petals (8)
+      for(let i=0;i<8;i++){
+        const p = document.createElement('div');
+        p.className = 'petal' + (Math.random()>0.85 ? ' dark' : '');
+        p.style.background = petalColors[Math.floor(rand(0,petalColors.length))];
+        const angle = i*(360/8);
+        p.style.transform = `translate(-50%,-50%) rotate(${angle}deg) translateY(-12px)`;
+        p.style.left = '50%'; p.style.top = '40%';
+        p.style.width = (46*scale)+'px'; p.style.height = (68*scale)+'px';
+        f.appendChild(p);
+      }
+
+      // center
+      const c = document.createElement('div');
+      c.className = 'center-dot';
+      c.style.width = (52*scale)+'px'; c.style.height = (52*scale)+'px';
+      c.style.marginLeft = -(26*scale)+'px'; c.style.marginTop = -(26*scale)+'px';
+      c.textContent = '';
+      f.appendChild(c);
+
+      // stem
+      const s = document.createElement('div');
+      s.className = 'stem';
+      s.style.height = (60*scale)+'px';
+      s.style.bottom = (-10*scale)+'px';
+      f.appendChild(s);
+
+      // leaves
+      const leaf1 = document.createElement('div');
+      leaf1.className = 'leaf';
+      leaf1.style.left = (w*0.3)+'px';
+      leaf1.style.bottom = (12*scale)+'px';
+      leaf1.style.transform = 'rotate(-25deg)';
+      f.appendChild(leaf1);
+
+      const leaf2 = document.createElement('div');
+      leaf2.className = 'leaf';
+      leaf2.style.left = (w*0.6)+'px';
+      leaf2.style.bottom = (6*scale)+'px';
+      leaf2.style.transform = 'rotate(20deg)';
+      f.appendChild(leaf2);
+
+      // subtle sway animation
+      f.animate([
+        { transform: 'translateY(0) rotate(' + rand(-3,3) + 'deg)'},
+        { transform: 'translateY(-10px) rotate(' + rand(-6,6) + 'deg)'},
+        { transform: 'translateY(0) rotate(' + rand(-3,3) + 'deg)'}
+      ], { duration: rand(4000,9000), iterations: Infinity, easing: 'ease-in-out' });
+
+      garden.appendChild(f);
+
+      return f;
+    }
+
+    // generar un pequeño jardín inicial
+    function seedGarden(){
+      const W = window.innerWidth, H = window.innerHeight;
+      for(let i=0;i<9;i++){
+        const x = rand(60, W-60);
+        const y = rand(H*0.45, H-0.9);
+        const sc = rand(0.7,1.1);
+        makeFlower(x,y,sc);
+      }
+    }
+
+    seedGarden();
+
+    // click / touch para plantar más
+    window.addEventListener('click', (e) => {
+      if(e.clientY < 80) return;
+      const count = Math.floor(rand(2,5));
+      for(let i=0;i<count;i++){
+        setTimeout(()=>{
+          makeFlower(e.clientX + rand(-40,40), e.clientY + rand(-20,40), rand(0.6,1.2));
+        }, i*120);
+      }
+    });
+
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === ' ' || e.key === 'Enter'){
+        const x = window.innerWidth/2, y=window.innerHeight*0.6;
+        for(let i=0;i<8;i++) makeFlower(x + rand(-160,160), y + rand(-20,80), rand(0.6,1.2));
+      }
+    });
+
+    window.addEventListener('resize', ()=>{});
+  </script>
+</body>
+</html>
